@@ -1,0 +1,8 @@
+Package: com.ipodtouch.reel
+Name: Reel
+Version: 1.0
+Architecture: iphoneos-arm
+Description: Personal video library
+Maintainer: me
+Author: me
+Section: Applications
