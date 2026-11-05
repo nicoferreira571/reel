@@ -1,0 +1,39 @@
+name: Build IPA
+
+on:
+  push:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Theos
+        uses: Randomblock1/theos-action@v1
+
+      - name: Make icon and launch images
+        run: |
+          mkdir -p Resources
+          sudo apt-get install -y imagemagick
+          convert -size 114x114 gradient:'#ff6a88-#ff9a5a' -fill white -stroke none -draw "polygon 44,32 44,82 86,57" Resources/Icon@2x.png
+          convert Resources/Icon@2x.png -resize 57x57 Resources/Icon.png
+          convert -size 640x960 xc:'#0e0f14' Resources/Default@2x.png
+          convert -size 320x480 xc:'#0e0f14' Resources/Default.png
+
+      - name: Build
+        run: make package FINALPACKAGE=1
+
+      - name: Make IPA
+        run: |
+          mkdir -p ipa_work Payload
+          dpkg-deb -x packages/*.deb ipa_work
+          cp -r ipa_work/Applications/Reel.app Payload/
+          zip -qry Reel.ipa Payload
+
+      - name: Upload IPA
+        uses: actions/upload-artifact@v4
+        with:
+          name: Reel-IPA
+          path: Reel.ipa
